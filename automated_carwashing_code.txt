@@ -1,0 +1,32 @@
+// Network 1: Start/Stop Cycle & Conveyor
+| X0        X1        M0
+|--| |--+--|/|----------------(SET M0)             // Start PB sets cycle ON
+|      |
+|      +--| M0 |----------------(Keep ON)          // Self-latch for cycle ON
+
+| M0 ---------------------------(Y0)               // Turn ON cycle_on_lamp
+| M0 ---------------------------(Y2)               // Turn ON conveyor motor
+
+// Network 2: Cycle ON Timer (T1 - Entry Delay)
+| M0 ---------------------------[T1 K50]           // T1 = 5 seconds after cycle starts
+
+// Network 3: Process ON (Start Spray/Brush when car enters)
+| X2        M0        T0
+|--| |--+--| |--+--|/|--------------(SET Y3)        // Process ON actuator (e.g., brushes/spray)
+|      |
+|      +--| Y3 |--------------------(Keep ON)      // Self-hold until exit condition
+
+// Network 4: Car Exit Sensor Triggers Delay
+| X3 -----------------------------[T1 K35]         // T1 = 3.5 seconds after car exit detected
+
+// Network 5: Process Close (Shutdown after delay)
+| T1        M1
+|--| |--+--| |-----------------------[T0 K50]      // T0 = 5 seconds shutdown timer
+
+| T0 ------------------------------(RST M0)        // Reset cycle
+| T0 ------------------------------(RST Y3)        // Stop process actuator
+| T0 ------------------------------(RST Y2)        // Stop conveyor
+| T0 ------------------------------(RST Y0)        // Turn off lamp
+
+// Network 6: Manual Water Pump Control
+| X4 -------------------------------(Y4)           // Manual ON/OFF water pump
